@@ -1,9 +1,5 @@
-import 'dart:developer';
-
 import 'package:fabrica_de_biscoitos/models/order.dart';
 import 'package:fabrica_de_biscoitos/models/oven.dart';
-
-import 'cookie.dart';
 
 class Line {
   String name;
@@ -19,17 +15,8 @@ class Line {
     required this.waitLine,
   });
 
-  void setIsFree() {
-    isFree = !isFree;
-  }
-
   void addToWaitLine(Order order) {
     waitLine.add(order);
-    inspect(waitLine);
-  }
-
-  void removeFromWaitLine() {
-    waitLine.removeAt(0);
   }
 
   void setOven() {}
@@ -57,9 +44,12 @@ class LineB extends Line {
   });
   @override
   void setOven() {
-    if (oven1.isFree)
+    // se for a linha B escolhe o forno que estiver disponivel primeiro
+    if (oven1.isFree) {
       oven = oven1;
-    else if (oven2.isFree) oven = oven2;
+    } else if (oven2.isFree) {
+      oven = oven2;
+    }
   }
 }
 

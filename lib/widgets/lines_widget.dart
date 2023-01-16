@@ -6,6 +6,7 @@ class LinesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //Representa todas as linhas de Produção na UI
     return FractionallySizedBox(
       heightFactor: 0.45,
       child: Row(

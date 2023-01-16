@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LineWidget extends StatelessWidget {
+  // representa Uma linha de prod
   final String lineName;
   LineWidget({required this.lineName});
 

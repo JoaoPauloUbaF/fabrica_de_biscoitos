@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class CookieWidget extends StatefulWidget {
+  // Componente (Widget) que representa um Biscoito
   final Color color;
   final String title;
-  bool isVisible = false;
+  bool isVisible = true;
   CookieWidget(
       {Key? key,
       this.color = Colors.brown,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class OvenWidget extends StatelessWidget {
+  // Representa o Forno na UI
   final bool isOn;
   const OvenWidget({super.key, required this.isOn});
 
