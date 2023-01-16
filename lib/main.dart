@@ -45,7 +45,6 @@ Future<ComputeArgumentsA> _handleLineA(ComputeArgumentsA args) async {
     Order order = lineA.waitLine.removeAt(0);
     orders.add(order);
     order.cookieWidget.isVisible = true;
-    // order.moveToOven();
     lineA.isFree = false;
   }
   return ComputeArgumentsA(lineA, orders);
@@ -58,7 +57,6 @@ Future<ComputeArgumentsB> _handleLineB(ComputeArgumentsB args) async {
     Order order = lineB.waitLine.removeAt(0);
     orders.add(order);
     order.cookieWidget.isVisible = true;
-    // order.moveToOven();
     lineB.isFree = false;
   }
   return ComputeArgumentsB(lineB, orders);
@@ -71,7 +69,6 @@ Future<ComputeArgumentsC> _handleLineC(ComputeArgumentsC args) async {
     Order order = lineC.waitLine.removeAt(0);
     orders.add(order);
     order.cookieWidget.isVisible = true;
-    // order.moveToOven();
     lineC.isFree = false;
   }
   return ComputeArgumentsC(lineC, orders);
@@ -152,6 +149,7 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _lineA = computedA.line;
       _orders = computedA.orders;
+      if (_orders.isNotEmpty) _orders.last.moveToOven();
     });
   }
 
@@ -164,6 +162,7 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _lineB = computedB.line;
       _orders = computedB.orders;
+      if (_orders.isNotEmpty) _orders.last.moveToOven();
     });
   }
 
@@ -176,14 +175,15 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _lineC = computedC.line;
       _orders = computedC.orders;
+      if (_orders.isNotEmpty) _orders.last.moveToOven();
     });
   }
 
   void _updateScreen() async {
     Future.delayed(Duration(seconds: 1), () {
       if (_lineA.waitLine.isNotEmpty && _lineA.isFree) _spawnComputeA();
-      if (_lineB.waitLine.isNotEmpty && _lineB.isFree) _spawnComputeB();
-      if (_lineC.waitLine.isNotEmpty && _lineC.isFree) _spawnComputeC();
+      if (_lineB.waitLine.isNotEmpty && _lineB.isFree) _spawnComputeA();
+      if (_lineC.waitLine.isNotEmpty && _lineB.isFree) _spawnComputeA();
       // _orders.firstWhere((element) => element == firstA).assignLine([widget.lineA]);
       setState(() {
         // print(_orders.last.positionOfTheRequest);
