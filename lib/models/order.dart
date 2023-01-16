@@ -32,16 +32,14 @@ class Order {
     // code to assign order to line
     bool gotAssigned = false;
     for (var i = 0; i < lines.length; i++) {
-      if (isSweet && lines[i].canMakeSweet && lines[i].isFree) {
+      if (isSweet && lines[i].canMakeSweet) {
         line = lines[i];
         if (line.name == "LineA") {
           positionOfTheRequest = Offset(55, 25);
           gotAssigned = true;
-          line.setIsFree();
         } else if (line.name == "LineB") {
           positionOfTheRequest = Offset(250, 25);
           gotAssigned = true;
-          line.setIsFree();
         }
         break;
       } else if (!isSweet && lines[i].isFree) {
@@ -49,27 +47,20 @@ class Order {
         if (line.name == "LineA") {
           positionOfTheRequest = Offset(55, 25);
           gotAssigned = true;
-          line.setIsFree();
         } else if (line.name == "LineB") {
           positionOfTheRequest = Offset(250, 25);
           gotAssigned = true;
-          line.setIsFree();
         } else if (line.name == "LineC") {
           positionOfTheRequest = Offset(425, 25);
           gotAssigned = true;
-          line.setIsFree();
         }
         break;
       }
     }
-    if (!gotAssigned) {
-      cookieWidget.setVisible();
-      int nextWaitLine = _nextWaitLine(lines);
-      lines[nextWaitLine].addToWaitLine(this);
-    }
-    if (gotAssigned) {
-      moveToOven();
-    }
+
+    cookieWidget.setVisible();
+    int nextWaitLine = _nextWaitLine(lines);
+    lines[nextWaitLine].addToWaitLine(this);
   }
 
   double calculateCookingTime(double T) {
@@ -91,7 +82,7 @@ class Order {
 
     do {
       line.setOven();
-      await Future.delayed(Duration(seconds: 1), () {
+      await Future.delayed(Duration(seconds: 2), () {
         if (line.oven.id == 1 && line.oven.isFree) {
           positionOfTheRequest = Offset(130, 270);
         } else if (line.oven.id == 2 && line.oven.isFree) {
@@ -99,7 +90,6 @@ class Order {
         }
       });
     } while (!line.oven.isFree);
-    line.setIsFree();
     line.oven.isFree = false;
     // after totalCookingTime seconds, move cookie to final position
     await Future.delayed(Duration(seconds: totalCookingTime.toInt()), () {
@@ -107,6 +97,7 @@ class Order {
       positionOfTheRequest = positionOfTheRequest.translate(0, 300);
       line.oven.isFree = true;
     });
+    line.setIsFree();
   }
 
   int _nextWaitLine(List<Line> lines) {

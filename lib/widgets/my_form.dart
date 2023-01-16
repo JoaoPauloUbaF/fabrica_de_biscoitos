@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:fabrica_de_biscoitos/widgets/cookie_widget.dart';
 import 'package:fabrica_de_biscoitos/widgets/lines_widget.dart';
 import 'package:flutter/material.dart';
@@ -8,12 +10,13 @@ import '../models/order.dart';
 class MyForm extends StatefulWidget {
   final List<Order> orders;
   final List<Line> lines;
-  final ValueChanged<Order> onOrderAdded;
-  const MyForm(
-      {super.key,
-      required this.orders,
-      required this.onOrderAdded,
-      required this.lines});
+  final Function onOrderAdded;
+  const MyForm({
+    super.key,
+    required this.orders,
+    required this.onOrderAdded,
+    required this.lines,
+  });
   @override
   _MyFormState createState() => _MyFormState();
 }
@@ -97,32 +100,31 @@ class _MyFormState extends State<MyForm> {
               ),
             ),
             Expanded(
-              flex: 1,
-              child: ElevatedButton(
+                flex: 1,
+                child: ElevatedButton(
                   child: const Text('Order'),
                   onPressed: () {
-                    setState(() {
-                      final order = Order(
-                        ingredient1: _ingredient1,
-                        ingredient2: _ingredient2,
-                        ingredient3: _ingredient3,
-                        isSweet: _isSweet,
-                        cookieWidget: _isSweet
-                            ? CookieWidget(
-                                title: 'Order $ids',
-                                color: Colors.pink,
-                              )
-                            : CookieWidget(
-                                title: 'Order $ids',
-                              ),
-                        id: ids,
-                      );
-                      order.assignLine(widget.lines);
-                      widget.onOrderAdded(order);
-                    });
-                    ids = ids + 1;
-                  }),
-            ),
+                    final Order order = Order(
+                      ingredient1: _ingredient1,
+                      ingredient2: _ingredient2,
+                      ingredient3: _ingredient3,
+                      isSweet: _isSweet,
+                      cookieWidget: _isSweet
+                          ? CookieWidget(
+                              title: 'Order $ids',
+                              color: Colors.pink,
+                            )
+                          : CookieWidget(
+                              title: 'Order $ids',
+                            ),
+                      id: ids,
+                    );
+                    ids++;
+                    order.assignLine(widget.lines);
+                    // order.moveToOven();
+                    widget.onOrderAdded();
+                  },
+                )),
           ],
         ),
       ),
