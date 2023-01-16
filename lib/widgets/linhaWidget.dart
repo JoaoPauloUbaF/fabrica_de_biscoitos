@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LinhaWidget extends StatelessWidget {
+  final String _lineName = "";
   const LinhaWidget({Key? key}) : super(key: key);
 
   @override
