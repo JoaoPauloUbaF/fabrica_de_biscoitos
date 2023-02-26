@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "849158029445",
+    "project_id": "cookiefactory-8018b",
+    "storage_bucket": "cookiefactory-8018b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849158029445:android:f3142edec67e7e719de9ec",
+        "android_client_info": {
+          "package_name": "com.example.fabrica_de_biscoitos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "849158029445-3p67b7rrhinrakocr9av7hsjg18pd63i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKSk66QE33tlNw6NMxIkvGuVVaC8TR3D0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "849158029445-3p67b7rrhinrakocr9av7hsjg18pd63i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

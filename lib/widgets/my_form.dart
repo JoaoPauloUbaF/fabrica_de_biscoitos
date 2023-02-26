@@ -4,17 +4,20 @@ import 'package:flutter/material.dart';
 
 import '../models/line.dart';
 import '../models/order.dart';
+import 'package:uuid/uuid.dart';
 
 class MyForm extends StatefulWidget {
   // Representa o Formulário para inserção do pedido na UI
-  final List<Order> orders;
   final List<Line> lines;
-  final ValueChanged<Order> onOrderAdded;
-  const MyForm(
-      {super.key,
-      required this.orders,
-      required this.onOrderAdded,
-      required this.lines});
+  final ValueChanged<CookieOrder> onOrderAdded;
+  final String? userCredentialEmail;
+
+  MyForm({
+    super.key,
+    required this.onOrderAdded,
+    required this.lines,
+    required this.userCredentialEmail,
+  });
   @override
   _MyFormState createState() => _MyFormState();
 }
@@ -23,8 +26,10 @@ class _MyFormState extends State<MyForm> {
   double _ingredient1 = 0;
   double _ingredient2 = 0;
   double _ingredient3 = 0;
-  int ids = 0;
+  String _lastId = '';
   bool _isSweet = false;
+  var uuid = const Uuid();
+  int numOrders = 1;
   CookieWidget cookieWidget = CookieWidget(title: "");
 
   double _timeConstant = 0.0;
@@ -146,7 +151,8 @@ class _MyFormState extends State<MyForm> {
                   child: const Text('Order'),
                   onPressed: () {
                     setState(() {
-                      final order = Order(
+                      _lastId = uuid.v4();
+                      final order = CookieOrder(
                         timeConstant: _timeConstant,
                         ingredient1: _ingredient1,
                         ingredient2: _ingredient2,
@@ -154,18 +160,20 @@ class _MyFormState extends State<MyForm> {
                         isSweet: _isSweet,
                         cookieWidget: _isSweet
                             ? CookieWidget(
-                                title: 'Order $ids',
+                                title: '${numOrders}º Order',
                                 color: Colors.pink,
                               )
                             : CookieWidget(
-                                title: 'Order $ids',
+                                title: '${numOrders}º Order',
                               ),
-                        id: ids,
+                        id: _lastId,
+                        userEmail: widget.userCredentialEmail!,
+                        isDone: false,
                       );
                       order.assignLine(widget.lines);
-                      // widget.onOrderAdded(order);
+                      widget.onOrderAdded(order);
+                      numOrders += 1;
                     });
-                    ids = ids + 1;
                   }),
             ),
           ],

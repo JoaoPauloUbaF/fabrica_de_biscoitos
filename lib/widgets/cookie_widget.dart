@@ -1,7 +1,34 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 
 // ignore: must_be_immutable
 class CookieWidget extends StatefulWidget {
+  factory CookieWidget.fromJson(Map<String, dynamic> json) {
+    return CookieWidget(
+      color: Color(json['color'] as int),
+      title: json['title'],
+      isVisible: json['isVisible'],
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'color': color.value,
+      'title': title,
+      'isVisible': isVisible,
+    };
+  }
+
+  factory CookieWidget.fromMap(Map<String, dynamic> map) {
+    return CookieWidget(
+      title: map['title'] as String,
+      isVisible: map['isVisible'] as bool,
+      color: Color(map['color'] as int),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
   // Componente (Widget) que representa um Biscoito
   final Color color;
   final String title;

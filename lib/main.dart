@@ -1,19 +1,33 @@
 import 'dart:async';
-import 'package:tuple/tuple.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fabrica_de_biscoitos/pages/login_page.dart';
+import 'package:fabrica_de_biscoitos/widgets/cookie_widget.dart';
 import 'package:fabrica_de_biscoitos/widgets/my_form.dart';
 import 'package:fabrica_de_biscoitos/widgets/oven_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 import 'models/line.dart';
 import 'models/order.dart';
 import 'models/oven.dart';
+import 'pages/report_page.dart';
 import 'widgets/lines_widget.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   final Oven oven1m = Oven(id: 1, isFree: true);
   final Oven oven2m = Oven(id: 2, isFree: true);
-  LineA lineAm = LineA(name: "LineA", oven: oven1m, waitLine: []);
+  LineA lineAm = LineA(
+    name: "LineA",
+    oven: oven1m,
+    waitLine: [],
+  );
   LineB lineBm = LineB(
     name: "LineB",
     oven1: oven1m,
@@ -22,32 +36,16 @@ void main() {
     oven: oven1m,
   );
   LineC lineCm = LineC(name: "LineC", oven: oven2m, waitLine: []);
-  // should print LineA class with oven1 assigned
-  runApp(MyApp(
-    lineA: lineAm,
-    lineB: lineBm,
-    lineC: lineCm,
-    oven1: oven1m,
-    oven2: oven2m,
+
+  runApp(MaterialApp(
+    home: LoginPage(
+      lineA: lineAm,
+      lineB: lineBm,
+      lineC: lineCm,
+      oven1: oven1m,
+      oven2: oven2m,
+    ),
   ));
-}
-
-void dequeueOrderThread(List<Order> orders, List<Line> lines, Line line) {
-  // Se conseguisse implementar a thread
-  if (line.isFree) {
-    Order order = line.waitLine.first;
-    order.inMovement = true;
-    orders.add(order);
-    order.moveToOven().then((value) => line.waitLine.removeAt(0));
-    order.inMovement = false;
-  }
-}
-
-Future<void> dequeueWaitLineAThread(Tuple3 tuple3) async {
-  if (tuple3.item1.waitLine.isNotEmpty &&
-      !tuple3.item1.waitLine.first.inMovement) {
-    dequeueOrderThread(tuple3.item2, tuple3.item3, tuple3.item1);
-  }
 }
 
 class MyApp extends StatefulWidget {
@@ -56,14 +54,17 @@ class MyApp extends StatefulWidget {
   final LineC lineC;
   final Oven oven1;
   final Oven oven2;
+  final UserCredential userCredential;
+
   const MyApp({
-    super.key,
+    Key? key,
     required this.lineA,
     required this.lineB,
     required this.lineC,
     required this.oven1,
     required this.oven2,
-  });
+    required this.userCredential,
+  }) : super(key: key);
 
   static const String _title = 'Fabrica de biscoitos';
 
@@ -72,31 +73,37 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final List<Order> _orders = [];
+  final List<CookieOrder> _orders = [];
   String report = '';
-
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  int lastId = 0;
   @override
   void initState() {
     //quando é iniciado o App
     super.initState();
+    //getOrders();
     _updateScreen();
+    //count();
+  }
+
+  Future<void> count() async {
+    for (int i = 0; i < 1000000; i++) {
+      await Future.delayed(const Duration(seconds: 1), () async {
+        print(i);
+      });
+    }
   }
 
   void _updateScreen() {
     //Re-Render da tela a cada 1s, tira das filas de espera para as linhas de prod
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 1), () async {
       setState(() {});
-      //compute(threadB, void)
-      dequeueWaitLineA(widget.lineA);
-      dequeueWaitLineB();
-      dequeueWaitLineC();
+      await dequeueWaitLineA(widget.lineA);
+      await dequeueWaitLineB();
+      await dequeueWaitLineC();
+
       _updateScreen();
     });
-  }
-
-  Future<void> threadB() async {
-    // impl thread
-    dequeueWaitLineB();
   }
 
   @override
@@ -166,10 +173,28 @@ class _MyAppState extends State<MyApp> {
               ),
               Expanded(
                 flex: 4,
-                child: MyForm(
-                  orders: _orders,
-                  onOrderAdded: _handleNewOrder,
-                  lines: [widget.lineA, widget.lineB, widget.lineC],
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('orders')
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Something went wrong');
+                    }
+
+                    // if (snapshot.connectionState == ConnectionState.waiting) {
+                    //   return CircularProgressIndicator();
+                    // }
+                    // getOrders();
+
+                    return MyForm(
+                      userCredentialEmail:
+                          widget.userCredential.user?.email ?? '',
+                      onOrderAdded: _handleNewOrder,
+                      lines: [widget.lineA, widget.lineB, widget.lineC],
+                    );
+                  },
                 ),
               ),
               Expanded(
@@ -177,7 +202,7 @@ class _MyAppState extends State<MyApp> {
                 child: ElevatedButton(
                   child: const Text('Relatório'),
                   onPressed: () {
-                    printReport();
+                    printReport(context);
                     // showAlertDialog(context);
                   },
                 ),
@@ -189,7 +214,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void printReport() {
+  void printReport(BuildContext context) async {
     double orderTime = 0.0;
     double totalTimeForAllOrders = 0.0;
     double totalIngredient1 = 0.0;
@@ -206,7 +231,13 @@ class _MyAppState extends State<MyApp> {
       report +=
           "${orderName}; Tipo de pedido: ${element.isSweet ? 'Recheado' : 'Salgado'}; Qtde Ingrediente 1: ${totalIngredient1} kg ; Qtde Ingrediente 2: ${totalIngredient2} kg ; Qtde Ingrediente 3: ${totalIngredient3} kg ; Tempo do pedido: ${orderTime} s ; Tempo Total: ${totalTimeForAllOrders} s; \n";
     });
-    print(report);
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReportPage(report: report),
+      ),
+    );
   }
 
   Future<void> dequeueWaitLineA(LineA lineA) async {
@@ -216,7 +247,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void dequeueWaitLineB() {
+  Future<void> dequeueWaitLineB() async {
     if (widget.lineB.waitLine.isNotEmpty &&
         !widget.lineB.waitLine.first.inMovement) {
       dequeueOrder(
@@ -224,7 +255,33 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void dequeueWaitLineC() {
+  Future<void> getOrders() async {
+    await firestore.collection("orders").get().then((querySnapshot) {
+      querySnapshot.docs.forEach((doc) {
+        final orderData = doc.data();
+        final order = CookieOrder.fromJson(orderData);
+        order.isDone
+            ? order.assignLineToDoneOrders(
+                [widget.lineA, widget.lineB, widget.lineC], doc.get('line'))
+            : order.assignLine([widget.lineA, widget.lineB, widget.lineC]);
+        order.inMovement = false;
+        addOrUpdateOrder(order);
+      });
+    });
+  }
+
+  void addOrUpdateOrder(CookieOrder order) {
+    int index = _orders.indexWhere((o) => o.id == order.id);
+    if (index == -1) {
+      // If order with same id does not exist, add to list
+      _orders.add(order);
+    } else {
+      // If order with same id exists, update existing order
+      _orders[index] = order;
+    }
+  }
+
+  Future<void> dequeueWaitLineC() async {
     if (widget.lineC.waitLine.isNotEmpty &&
         !widget.lineC.waitLine.first.inMovement) {
       dequeueOrder(
@@ -232,12 +289,20 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void dequeueOrder(List<Order> orders, List<Line> lines, Line line) {
+  Future<void> dequeueOrder(
+      List<CookieOrder> orders, List<Line> lines, Line line) async {
     if (line.isFree) {
-      Order order = line.waitLine.first;
-      order.inMovement = true;
-      orders.add(order);
-      order.moveToOven().then((value) => line.waitLine.removeAt(0));
+      CookieOrder order = line.waitLine.first;
+
+      if (!order.isDone) {
+        order.inMovement = true;
+      }
+
+      addOrUpdateOrder(order);
+      order
+          .moveToOven()
+          .then((value) => line.waitLine.removeAt(0))
+          .then((value) async => await sendOrderToServer());
       order.inMovement = false;
     }
   }
@@ -250,9 +315,20 @@ class _MyAppState extends State<MyApp> {
       return line.waitLine.length - 1;
   }
 
-  void _handleNewOrder(Order order) {
+  Future<void> _handleNewOrder(CookieOrder order) async {
     //Att a Ui quando há um novo pedido
     setState(() {});
+  }
+
+  Future<void> sendOrderToServer() async {
+    for (int i = 0; i < _orders.length; i++) {
+      CookieOrder order = _orders[i];
+      //print(order.toJson());
+      await firestore
+          .collection('orders')
+          .doc(order.id.toString())
+          .set(order.toJson());
+    }
   }
 
   void showAlertDialog(BuildContext context) {
