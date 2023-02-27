@@ -6,6 +6,7 @@ import 'package:fabrica_de_biscoitos/widgets/cookie_widget.dart';
 import 'package:fabrica_de_biscoitos/widgets/my_form.dart';
 import 'package:fabrica_de_biscoitos/widgets/oven_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -54,7 +55,7 @@ class MyApp extends StatefulWidget {
   final LineC lineC;
   final Oven oven1;
   final Oven oven2;
-  final UserCredential userCredential;
+  final User userCredential;
 
   const MyApp({
     Key? key,
@@ -98,9 +99,9 @@ class _MyAppState extends State<MyApp> {
     //Re-Render da tela a cada 1s, tira das filas de espera para as linhas de prod
     Future.delayed(const Duration(seconds: 1), () async {
       setState(() {});
-      await dequeueWaitLineA(widget.lineA);
-      await dequeueWaitLineB();
-      await dequeueWaitLineC();
+      await dequeueWaitLine(widget.lineA);
+      await dequeueWaitLine(widget.lineB);
+      await dequeueWaitLine(widget.lineC);
 
       _updateScreen();
     });
@@ -108,14 +109,23 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      scrollBehavior: MaterialScrollBehavior().copyWith(
+        dragDevices: {
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.unknown
+        },
+      ),
       title: MyApp._title,
       home: Scaffold(
-        backgroundColor: Colors.grey.shade600,
+        backgroundColor: Colors.black,
         appBar: AppBar(
           title: const Text(MyApp._title),
-          backgroundColor: Colors.black,
+          backgroundColor: Colors.grey,
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -158,13 +168,13 @@ class _MyAppState extends State<MyApp> {
                         child: _orders[i].cookieWidget,
                       ),
                     Positioned(
-                        left: 30,
+                        left: 150,
                         top: 220,
                         child: OvenWidget(
                           isOn: !widget.oven1.isFree,
                         )),
                     Positioned(
-                      left: 230,
+                      left: 500,
                       top: 220,
                       child: OvenWidget(isOn: !widget.oven2.isFree),
                     ),
@@ -183,14 +193,10 @@ class _MyAppState extends State<MyApp> {
                       return Text('Something went wrong');
                     }
 
-                    // if (snapshot.connectionState == ConnectionState.waiting) {
-                    //   return CircularProgressIndicator();
-                    // }
                     // getOrders();
 
                     return MyForm(
-                      userCredentialEmail:
-                          widget.userCredential.user?.email ?? '',
+                      userCredentialEmail: widget.userCredential.email ?? '',
                       onOrderAdded: _handleNewOrder,
                       lines: [widget.lineA, widget.lineB, widget.lineC],
                     );
@@ -204,6 +210,27 @@ class _MyAppState extends State<MyApp> {
                   onPressed: () {
                     printReport(context);
                     // showAlertDialog(context);
+                  },
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: ElevatedButton(
+                  child: Text('Sign Out'),
+                  onPressed: () async {
+                    await _auth.signOut();
+                    // ignore: use_build_context_synchronously
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginPage(
+                            lineA: widget.lineA,
+                            lineB: widget.lineB,
+                            lineC: widget.lineC,
+                            oven1: widget.oven1,
+                            oven2: widget.oven2,
+                          ),
+                        ));
                   },
                 ),
               ),
@@ -229,7 +256,7 @@ class _MyAppState extends State<MyApp> {
       totalIngredient2 = element.ingredient2;
       totalIngredient3 = element.ingredient3;
       report +=
-          "${orderName}; Tipo de pedido: ${element.isSweet ? 'Recheado' : 'Salgado'}; Qtde Ingrediente 1: ${totalIngredient1} kg ; Qtde Ingrediente 2: ${totalIngredient2} kg ; Qtde Ingrediente 3: ${totalIngredient3} kg ; Tempo do pedido: ${orderTime} s ; Tempo Total: ${totalTimeForAllOrders} s; \n";
+          "${orderName}; ${element.isSweet ? 'Recheado' : 'Salgado'};  ${totalIngredient1} kg ; ${totalIngredient2} kg ;  ${totalIngredient3} kg ;  ${orderTime} s ;  ${totalTimeForAllOrders} s; \n";
     });
 
     await Navigator.push(
@@ -240,18 +267,10 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Future<void> dequeueWaitLineA(LineA lineA) async {
+  Future<void> dequeueWaitLine(Line line) async {
     // Retira o primeiro elemento da fila e coloca na linha
-    if (lineA.waitLine.isNotEmpty && !lineA.waitLine.first.inMovement) {
-      dequeueOrder(_orders, [widget.lineA, widget.lineB, widget.lineC], lineA);
-    }
-  }
-
-  Future<void> dequeueWaitLineB() async {
-    if (widget.lineB.waitLine.isNotEmpty &&
-        !widget.lineB.waitLine.first.inMovement) {
-      dequeueOrder(
-          _orders, [widget.lineA, widget.lineB, widget.lineC], widget.lineB);
+    if (line.waitLine.isNotEmpty && !line.waitLine.first.inMovement) {
+      dequeueOrder(_orders, [widget.lineA, widget.lineB, widget.lineC], line);
     }
   }
 
@@ -323,11 +342,15 @@ class _MyAppState extends State<MyApp> {
   Future<void> sendOrderToServer() async {
     for (int i = 0; i < _orders.length; i++) {
       CookieOrder order = _orders[i];
-      //print(order.toJson());
-      await firestore
-          .collection('orders')
-          .doc(order.id.toString())
-          .set(order.toJson());
+      try {
+        await firestore
+            .collection('orders')
+            .doc(order.id.toString())
+            .set(order.toJson());
+      } catch (error) {
+        // Handle the error here
+        print('Error sending order: $error');
+      }
     }
   }
 

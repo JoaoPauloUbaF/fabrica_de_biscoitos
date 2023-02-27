@@ -49,13 +49,13 @@ class CookieOrder {
       nextWaitLine.addToWaitLine(this);
       if (nextWaitLine.name == "LineA") {
         line = nextWaitLine;
-        positionOfTheRequest = const Offset(55, 25);
+        positionOfTheRequest = const Offset(150, 25);
       } else if (nextWaitLine.name == "LineB") {
         line = nextWaitLine;
-        positionOfTheRequest = const Offset(250, 25);
+        positionOfTheRequest = const Offset(460, 25);
       } else if (nextWaitLine.name == "LineC") {
         line = nextWaitLine;
-        positionOfTheRequest = const Offset(425, 25);
+        positionOfTheRequest = const Offset(710, 25);
       }
     }
   }
@@ -95,9 +95,9 @@ class CookieOrder {
         line.setOven();
         await Future.delayed(Duration(seconds: 1), () {
           if (line.oven.id == 1 && line.oven.isFree) {
-            positionOfTheRequest = Offset(130, 270);
+            positionOfTheRequest = Offset(250, 270);
           } else if (line.oven.id == 2 && line.oven.isFree) {
-            positionOfTheRequest = Offset(330, 270);
+            positionOfTheRequest = Offset(610, 270);
           }
         });
       } while (!line.oven.isFree); //espera o forno ficar disponível
@@ -112,6 +112,7 @@ class CookieOrder {
       line.isFree = true;
       isDone = true;
       cookieWidget.isVisible = false;
+      //print('cookie ${id} done!');
     }
   }
 

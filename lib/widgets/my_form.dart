@@ -1,6 +1,7 @@
 import 'package:fabrica_de_biscoitos/widgets/cookie_widget.dart';
 import 'package:fabrica_de_biscoitos/widgets/lines_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../models/line.dart';
 import '../models/order.dart';
@@ -46,11 +47,13 @@ class _MyFormState extends State<MyForm> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'T:',
                     hintStyle: TextStyle(color: Colors.white.withAlpha(100)),
                   ),
                   keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   onChanged: (value) {
                     setState(() {
                       if (value == "") value = "0.0";
@@ -65,11 +68,13 @@ class _MyFormState extends State<MyForm> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Ingrediente 1 (kg)',
                     hintStyle: TextStyle(color: Colors.white.withAlpha(100)),
                   ),
                   keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   onChanged: (value) {
                     setState(() {
                       if (value == "") value = "0.0";
@@ -84,10 +89,12 @@ class _MyFormState extends State<MyForm> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Ingrediente 2 (kg)',
                     hintStyle: TextStyle(color: Colors.white.withAlpha(100)),
                   ),
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   keyboardType: TextInputType.number,
                   onChanged: (value) {
                     if (value == "") value = "0.0";
@@ -103,11 +110,13 @@ class _MyFormState extends State<MyForm> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextFormField(
+                  style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Ingrediente 3 (kg)',
                     hintStyle: TextStyle(color: Colors.white.withAlpha(100)),
                   ),
                   keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   onChanged: (value) {
                     if (value == "") value = "0.0";
                     setState(() {

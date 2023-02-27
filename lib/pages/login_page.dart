@@ -37,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
         email: email,
         password: password,
       );
+      User? user = userCredential.user;
       // Navigate to the home page after successful login
       // ignore: use_build_context_synchronously
       Navigator.pushReplacement(
@@ -48,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
                     lineC: widget.lineC,
                     oven1: widget.oven1,
                     oven2: widget.oven2,
-                    userCredential: userCredential,
+                    userCredential: user!,
                   )));
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
@@ -94,5 +95,23 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  void isLogged() {
+    User? currentUser = _auth.currentUser;
+
+    if (currentUser != null) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MyApp(
+                    lineA: widget.lineA,
+                    lineB: widget.lineB,
+                    lineC: widget.lineC,
+                    oven1: widget.oven1,
+                    oven2: widget.oven2,
+                    userCredential: currentUser,
+                  )));
+    }
   }
 }

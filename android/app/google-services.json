@@ -7,6 +7,42 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:849158029445:android:4177d9b106aecee09de9ec",
+        "android_client_info": {
+          "package_name": "com.example.cookie_orders_service"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "849158029445-3p67b7rrhinrakocr9av7hsjg18pd63i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKSk66QE33tlNw6NMxIkvGuVVaC8TR3D0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "849158029445-3p67b7rrhinrakocr9av7hsjg18pd63i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "849158029445-b7rbe3oovep66jfcp8jegb8hro5knfn1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.cookieOrdersService"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:849158029445:android:f3142edec67e7e719de9ec",
         "android_client_info": {
           "package_name": "com.example.fabrica_de_biscoitos"
@@ -29,6 +65,13 @@
             {
               "client_id": "849158029445-3p67b7rrhinrakocr9av7hsjg18pd63i.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "849158029445-b7rbe3oovep66jfcp8jegb8hro5knfn1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.cookieOrdersService"
+              }
             }
           ]
         }
