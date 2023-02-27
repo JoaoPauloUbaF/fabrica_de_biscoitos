@@ -126,10 +126,9 @@ class _MyFormState extends State<MyForm> {
                 ),
               ),
             ),
-            Expanded(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
                 child: Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
@@ -154,8 +153,9 @@ class _MyFormState extends State<MyForm> {
                 ),
               ),
             ),
-            Expanded(
-              flex: 1,
+            SizedBox(
+              width: 100,
+              height: 30,
               child: ElevatedButton(
                   child: const Text('Order'),
                   onPressed: () {

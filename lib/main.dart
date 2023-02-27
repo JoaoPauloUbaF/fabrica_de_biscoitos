@@ -181,57 +181,73 @@ class _MyAppState extends State<MyApp> {
                   ],
                 ),
               ),
-              Expanded(
-                flex: 4,
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('orders')
-                      .snapshots(),
-                  builder: (BuildContext context,
-                      AsyncSnapshot<QuerySnapshot> snapshot) {
-                    if (snapshot.hasError) {
-                      return Text('Something went wrong');
-                    }
-
-                    // getOrders();
-
-                    return MyForm(
-                      userCredentialEmail: widget.userCredential.email ?? '',
-                      onOrderAdded: _handleNewOrder,
-                      lines: [widget.lineA, widget.lineB, widget.lineC],
+              StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance.collection('orders').snapshots(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasError) {
+                    // ignore: prefer_const_constructors
+                    return SizedBox(
+                      width: 200,
+                      height: 20,
+                      child: const Text(
+                        'Problemas com o firestore!',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     );
-                  },
-                ),
+                  }
+
+                  // getOrders();
+
+                  return const SizedBox(
+                    width: 20,
+                    height: 20,
+                  );
+                },
               ),
               Expanded(
-                flex: 1,
+                flex: 4,
+                child: MyForm(
+                  userCredentialEmail: widget.userCredential.email ?? '',
+                  onOrderAdded: _handleNewOrder,
+                  lines: [widget.lineA, widget.lineB, widget.lineC],
+                ),
+              ),
+              SizedBox(
+                width: 100,
+                height: 30,
                 child: ElevatedButton(
                   child: const Text('Relatório'),
-                  onPressed: () {
+                  onPressed: () async {
                     printReport(context);
                     // showAlertDialog(context);
                   },
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: ElevatedButton(
-                  child: Text('Sign Out'),
-                  onPressed: () async {
-                    await _auth.signOut();
-                    // ignore: use_build_context_synchronously
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LoginPage(
-                            lineA: widget.lineA,
-                            lineB: widget.lineB,
-                            lineC: widget.lineC,
-                            oven1: widget.oven1,
-                            oven2: widget.oven2,
-                          ),
-                        ));
-                  },
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: SizedBox(
+                  width: 100,
+                  height: 30,
+                  child: ElevatedButton(
+                    child: Text('Sign Out'),
+                    onPressed: () async {
+                      await _auth.signOut();
+                      // ignore: use_build_context_synchronously
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginPage(
+                              lineA: widget.lineA,
+                              lineB: widget.lineB,
+                              lineC: widget.lineC,
+                              oven1: widget.oven1,
+                              oven2: widget.oven2,
+                            ),
+                          ));
+                    },
+                  ),
                 ),
               ),
             ],
