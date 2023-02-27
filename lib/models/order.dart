@@ -80,6 +80,7 @@ class CookieOrder {
 
   Future<void> moveToOven() async {
     if (!isDone && inMovement) {
+      //isDone = true;
       double totalCookingTime = calculateCookingTime(timeConstant);
       line.isFree = false;
       // Muda a posição pro quadrante Ingrediente 2

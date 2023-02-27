@@ -82,8 +82,9 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     //quando é iniciado o App
     super.initState();
-    //getOrders();
+    getOrders();
     _updateScreen();
+    _getServerOrders();
     //count();
   }
 
@@ -99,11 +100,24 @@ class _MyAppState extends State<MyApp> {
     //Re-Render da tela a cada 1s, tira das filas de espera para as linhas de prod
     Future.delayed(const Duration(seconds: 1), () async {
       setState(() {});
-      await dequeueWaitLine(widget.lineA);
-      await dequeueWaitLine(widget.lineB);
-      await dequeueWaitLine(widget.lineC);
-
+      if (widget.lineA.waitLine.isNotEmpty) {
+        dequeueWaitLine(widget.lineA);
+      }
+      if (widget.lineB.waitLine.isNotEmpty) {
+        dequeueWaitLine(widget.lineB);
+      }
+      if (widget.lineC.waitLine.isNotEmpty) {
+        dequeueWaitLine(widget.lineC);
+      }
       _updateScreen();
+    });
+  }
+
+  void _getServerOrders() {
+    //Re-Render da tela a cada 1s, tira das filas de espera para as linhas de prod
+    Future.delayed(const Duration(seconds: 30), () async {
+      getOrders();
+      _getServerOrders();
     });
   }
 
@@ -198,7 +212,7 @@ class _MyAppState extends State<MyApp> {
                     );
                   }
 
-                  // getOrders();
+                  //getOrders();
 
                   return const SizedBox(
                     width: 20,
@@ -264,6 +278,7 @@ class _MyAppState extends State<MyApp> {
     double totalIngredient2 = 0.0;
     double totalIngredient3 = 0.0;
     String orderName = '';
+    String user = '';
     _orders.forEach((element) {
       orderName = 'Pedido ${element.id}';
       orderTime = element.totalTime;
@@ -337,7 +352,7 @@ class _MyAppState extends State<MyApp> {
       order
           .moveToOven()
           .then((value) => line.waitLine.removeAt(0))
-          .then((value) async => await sendOrderToServer());
+          .then((value) async => await sendOrderToServer(order));
       order.inMovement = false;
     }
   }
@@ -351,22 +366,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _handleNewOrder(CookieOrder order) async {
-    //Att a Ui quando há um novo pedido
+    await dequeueWaitLine(widget.lineA);
+    await dequeueWaitLine(widget.lineB);
+    await dequeueWaitLine(widget.lineC);
     setState(() {});
   }
 
-  Future<void> sendOrderToServer() async {
-    for (int i = 0; i < _orders.length; i++) {
-      CookieOrder order = _orders[i];
-      try {
-        await firestore
-            .collection('orders')
-            .doc(order.id.toString())
-            .set(order.toJson());
-      } catch (error) {
-        // Handle the error here
-        print('Error sending order: $error');
-      }
+  Future<void> sendOrderToServer(CookieOrder order) async {
+    try {
+      await firestore
+          .collection('orders')
+          .doc(order.id.toString())
+          .set(order.toJson());
+    } catch (error) {
+      // Handle the error here
+      print('Error sending order: $error');
     }
   }
 
